@@ -395,6 +395,7 @@ function render() {
   html += `<div class="teacher-left">`;
   html += `<span class="teacher-icon">🎓</span>`;
   html += `<div><span class="teacher-name">${teacher.name}</span>`;
+  if (teacher.phone) html += `<div style="margin-top:3px"><a class="phone-tag" href="tel:${teacher.phone}">📞 ${teacher.phone}</a></div>`;
   if (teacher.note) html += `<div style="font-size:12px;color:#94a3b8;margin-top:2px">${teacher.note}</div>`;
   html += `</div></div>`;
   const tc = STATUS_CONFIG[teacher.status] || STATUS_CONFIG["미정"];
