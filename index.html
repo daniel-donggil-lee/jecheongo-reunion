@@ -163,6 +163,22 @@ input, select, textarea { font-family: inherit; }
 .add-issue-row { display: flex; gap: 8px; }
 .add-issue-row input { flex: 1; }
 .add-issue-row button { white-space: nowrap; }
+
+/* Todos section */
+.todos-card { border-left: 4px solid #10b981; }
+.todos-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: #f0fdf4; }
+.todos-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: #065f46; }
+.todos-stats { font-size: 12px; color: #94a3b8; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 16px; border-top: 1px solid #d1fae5; }
+.todo-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #10b981; cursor: pointer; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: transparent; transition: all 0.15s; background: transparent; }
+.todo-check.done { background: #10b981; color: #fff; }
+.todo-body { flex: 1; min-width: 0; }
+.todo-text { font-size: 13px; color: #1e293b; line-height: 1.5; word-break: break-all; }
+.todo-text.done { text-decoration: line-through; color: #94a3b8; }
+.todo-due { font-size: 11px; color: #64748b; margin-top: 2px; }
+.todo-delete { font-size: 11px; color: #dc2626; background: none; border: none; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; margin-top: 1px; cursor: pointer; }
+.todo-delete:hover { background: #fee2e2; }
+.add-todo-area { padding: 10px 16px; border-top: 1px solid #d1fae5; }
 </style>
 </head>
 <body>
@@ -196,6 +212,7 @@ const db = firebase.database();
 const membersRef = db.ref('members');
 const teacherRef = db.ref('teacher');
 const issuesRef = db.ref('issues');
+const todosRef = db.ref('todos');
 
 // ── Initial Data ──
 const INITIAL_MEMBERS = [
@@ -249,6 +266,8 @@ const STATUS_ORDER = ["확정", "준확정", "조건부", "미정", "불가"];
 let members = [];
 let teacher = { name: "최민석 선생님", status: "확정", note: "" };
 let issues = [];
+let todos = [];
+let showAddTodo = false;
 let expandedGroup = null;
 let editingMember = null;
 let editingTeacher = false;
@@ -419,6 +438,40 @@ function render() {
     html += `<input class="input-field" id="newIssueAuthor" placeholder="작성자 (선택)">`;
     html += `<button class="btn-sm btn-primary" onclick="addIssue()">등록</button>`;
     html += `<button class="btn-sm btn-ghost" onclick="toggleAddIssue()">취소</button>`;
+    html += `</div></div>`;
+  }
+  html += `</div>`;
+
+  // Todos Section
+  const doneTodos = todos.filter(t => t.done).length;
+  html += `<div class="card todos-card" style="margin-bottom:14px">`;
+  html += `<div class="todos-header">`;
+  html += `<div class="todos-title">📋 할일 체크리스트</div>`;
+  html += `<span class="todos-stats">${doneTodos}/${todos.length} 완료</span>`;
+  html += `</div>`;
+  if (todos.length === 0) {
+    html += `<div class="empty" style="border-top:1px solid #d1fae5">등록된 할일이 없습니다</div>`;
+  } else {
+    todos.forEach(todo => {
+      html += `<div class="todo-item">`;
+      html += `<button class="todo-check ${todo.done ? 'done' : ''}" onclick="toggleTodoItem('${todo.id}')">✓</button>`;
+      html += `<div class="todo-body">`;
+      html += `<div class="todo-text ${todo.done ? 'done' : ''}">${escapeHtml(todo.text)}</div>`;
+      if (todo.dueDate) html += `<div class="todo-due">⏰ ${todo.dueDate}까지</div>`;
+      html += `</div>`;
+      html += `<button class="todo-delete" onclick="deleteTodoItem('${todo.id}')">✕</button>`;
+      html += `</div>`;
+    });
+  }
+  if (!showAddTodo) {
+    html += `<div style="padding:10px 16px;border-top:1px solid #d1fae5"><button class="btn-add" style="padding:8px;font-size:13px;color:#065f46" onclick="toggleAddTodo()">+ 할일 추가</button></div>`;
+  } else {
+    html += `<div class="add-todo-area">`;
+    html += `<div style="margin-bottom:6px"><input class="input-field" id="newTodoText" placeholder="할일 내용 입력"></div>`;
+    html += `<div class="add-issue-row">`;
+    html += `<input class="input-field" id="newTodoDue" placeholder="기한 (예: 04/15)">`;
+    html += `<button class="btn-sm btn-primary" onclick="addTodoItem()">등록</button>`;
+    html += `<button class="btn-sm btn-ghost" onclick="toggleAddTodo()">취소</button>`;
     html += `</div></div>`;
   }
   html += `</div>`;
@@ -621,6 +674,36 @@ function deleteIssue(id) {
   showToast('이슈 삭제됨');
 }
 
+// ── Todos Handlers ──
+function toggleAddTodo() {
+  showAddTodo = !showAddTodo;
+  render();
+}
+
+function addTodoItem() {
+  const text = document.getElementById('newTodoText').value.trim();
+  const dueDate = document.getElementById('newTodoDue').value.trim();
+  if (!text) { showToast('할일 내용을 입력해주세요'); return; }
+  const id = Date.now().toString();
+  todosRef.child(id).set({ id, text, done: false, dueDate: dueDate || '', createdAt: Date.now() });
+  showAddTodo = false;
+  showToast('할일 추가됨');
+}
+
+function toggleTodoItem(id) {
+  const todo = todos.find(t => t.id === id);
+  if (todo) {
+    todosRef.child(id).update({ done: !todo.done });
+    showToast(todo.done ? '미완료로 변경됨' : '완료!');
+  }
+}
+
+function deleteTodoItem(id) {
+  if (!confirm('이 할일을 삭제하시겠습니까?')) return;
+  todosRef.child(id).remove();
+  showToast('할일 삭제됨');
+}
+
 // ── Firebase Listeners ──
 db.ref('.info/connected').on('value', snap => {
   isConnected = snap.val() === true;
@@ -658,6 +741,34 @@ issuesRef.on('value', snap => {
   } else {
     issues = [];
   }
+  render();
+});
+
+// Todos listener
+const INITIAL_TODOS = [
+  { text: "강남 식당 물색 및 예약 (20~30인 수용)", dueDate: "04/15", createdAt: 1 },
+  { text: "장소 예약금 결제", dueDate: "04/15", createdAt: 2 },
+  { text: "미정 인원 참석 독려 연락", dueDate: "04/20", createdAt: 3 },
+  { text: "최민석 선생님 최종 확인 연락", dueDate: "04/20", createdAt: 4 },
+  { text: "1인당 회비 금액 결정", dueDate: "04/20", createdAt: 5 },
+  { text: "추억 사진/영상 수집 (구글폼 등)", dueDate: "05/01", createdAt: 6 },
+  { text: "최종 참석 인원 확정 집계", dueDate: "05/02", createdAt: 7 },
+  { text: "확정 인원 회비 수금", dueDate: "05/10", createdAt: 8 },
+  { text: "모임 타임테이블 작성", dueDate: "05/10", createdAt: 9 },
+  { text: "장소 안내문/약도 단체 발송", dueDate: "05/12", createdAt: 10 },
+  { text: "촬영 담당 지정", dueDate: "05/12", createdAt: 11 },
+];
+
+todosRef.on('value', snap => {
+  const data = snap.val();
+  if (!data) {
+    INITIAL_TODOS.forEach((t, i) => {
+      const id = 'todo_' + String(i + 1).padStart(2, '0');
+      todosRef.child(id).set({ id, text: t.text, done: false, dueDate: t.dueDate, createdAt: t.createdAt });
+    });
+    return;
+  }
+  todos = Object.values(data).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   render();
 });
 </script>
