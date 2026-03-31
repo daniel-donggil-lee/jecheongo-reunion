@@ -68,6 +68,8 @@ input, select, textarea { font-family: inherit; }
 .member-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .note-tag { font-size: 11px; color: #94a3b8; background: #f1f5f9; padding: 2px 7px; border-radius: 4px; }
 .assign-tag { font-size: 11px; color: #6366f1; background: #eef2ff; padding: 2px 7px; border-radius: 4px; }
+.phone-tag { font-size: 11px; color: #0369a1; background: #e0f2fe; padding: 2px 7px; border-radius: 4px; text-decoration: none; }
+.location-tag { font-size: 11px; color: #7c3aed; background: #f5f3ff; padding: 2px 7px; border-radius: 4px; }
 .edit-hint { font-size: 11px; color: #94a3b8; margin-left: auto; white-space: nowrap; }
 .empty { padding: 20px; text-align: center; color: #94a3b8; font-size: 13px; }
 
@@ -315,6 +317,8 @@ function saveMember(member) {
     status: member.status,
     assignedTo: member.assignedTo || "",
     note: member.note || "",
+    phone: member.phone || "",
+    location: member.location || "",
   });
 }
 
@@ -497,6 +501,8 @@ function render() {
           html += `<div class="member-row" onclick="toggleEdit('${m.name}')">`;
           html += `<div style="flex:1;min-width:0"><div class="member-tags">`;
           html += `<span class="member-name">${m.name}</span>`;
+          if (m.phone) html += `<a class="phone-tag" href="tel:${m.phone}">📞 ${m.phone}</a>`;
+          if (m.location) html += `<span class="location-tag">📍 ${m.location}</span>`;
           if (m.note) html += `<span class="note-tag">${m.note}</span>`;
           if (m.assignedTo) html += `<span class="assign-tag">담당: ${m.assignedTo}</span>`;
           if (assignees.length > 0) html += `<span class="assign-tag">연락 담당 → ${assignees.join(', ')}</span>`;
@@ -514,6 +520,8 @@ function render() {
               html += `<button class="btn-status" style="background:${isActive ? sc.color : sc.bg};color:${isActive ? '#fff' : sc.color};border-color:${sc.border}" onclick="event.stopPropagation();changeStatus('${m.name}','${s}')">${sc.emoji} ${s}</button>`;
             });
             html += `</div>`;
+            html += `<div style="margin-bottom:8px"><input class="input-field" placeholder="전화번호 (예: 010-1234-5678)" value="${m.phone || ''}" oninput="changePhone('${m.name}', this.value)" onclick="event.stopPropagation()"></div>`;
+            html += `<div style="margin-bottom:8px"><input class="input-field" placeholder="거주 지역 (예: 서울 마포, 경기 성남)" value="${m.location || ''}" oninput="changeLocation('${m.name}', this.value)" onclick="event.stopPropagation()"></div>`;
             html += `<div style="margin-bottom:8px"><input class="input-field" placeholder="비고 (예: 출산 예정, 해외 출장)" value="${m.note || ''}" oninput="changeNote('${m.name}', this.value)" onclick="event.stopPropagation()"></div>`;
             html += `<div style="margin-bottom:8px"><div class="edit-section-title">연락 담당자 (이 사람에게 연락할 담당)</div>`;
             html += `<select class="select-field" onchange="event.stopPropagation();changeAssignedTo('${m.name}', this.value)" onclick="event.stopPropagation()">`;
@@ -569,6 +577,26 @@ function changeNote(name, note) {
     m.note = note;
     clearTimeout(noteTimer);
     noteTimer = setTimeout(() => saveMember(m), 500);
+  }
+}
+
+let phoneTimer = null;
+function changePhone(name, phone) {
+  const m = members.find(x => x.name === name);
+  if (m) {
+    m.phone = phone;
+    clearTimeout(phoneTimer);
+    phoneTimer = setTimeout(() => saveMember(m), 500);
+  }
+}
+
+let locationTimer = null;
+function changeLocation(name, location) {
+  const m = members.find(x => x.name === name);
+  if (m) {
+    m.location = location;
+    clearTimeout(locationTimer);
+    locationTimer = setTimeout(() => saveMember(m), 500);
   }
 }
 
