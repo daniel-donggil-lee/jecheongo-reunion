@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>제천고 3-5반 동창 모임</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  min-height: 100vh;
+  color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 520px; margin: 0 auto; padding: 20px 16px 40px; }
+button { cursor: pointer; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+
+/* Header */
+.header { text-align: center; margin-bottom: 20px; }
+.header-photo { width: 100%; border-radius: 14px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.header-photo img { width: 100%; height: auto; display: block; }
+.header-school { font-size: 13px; color: #94a3b8; font-weight: 500; letter-spacing: 0.05em; margin-bottom: 4px; }
+.header-title { font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+.header-info { margin-top: 8px; display: flex; justify-content: center; gap: 16px; font-size: 13px; color: #64748b; }
+
+/* Card */
+.card { background: #fff; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 10px; }
+
+/* Summary */
+.summary { padding: 14px 16px; }
+.summary-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.summary-label { font-size: 13px; font-weight: 700; color: #334155; }
+.summary-total { font-size: 12px; color: #94a3b8; }
+.pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+.expected { margin-top: 10px; padding: 8px 12px; background: #f0f9ff; border-radius: 8px; font-size: 12.5px; color: #0369a1; }
+.expected strong { font-weight: 700; }
+.expected .sub { color: #94a3b8; }
+.progress-bar { height: 5px; display: flex; }
+
+/* Group */
+.group-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; cursor: pointer; user-select: none; transition: background 0.15s;
+}
+.group-header:hover { filter: brightness(0.97); }
+.group-left { display: flex; align-items: center; gap: 8px; }
+.group-emoji { font-size: 16px; }
+.group-label { font-weight: 700; font-size: 14px; }
+.group-desc { font-size: 12px; color: #94a3b8; }
+.group-right { display: flex; align-items: center; gap: 8px; }
+.badge { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; border-radius: 999px; font-size: 12px; font-weight: 700; padding: 0 6px; color: #fff; }
+.arrow { font-size: 12px; color: #94a3b8; transition: transform 0.2s; }
+.arrow.open { transform: rotate(180deg); }
+
+/* Member */
+.member-row {
+  display: flex; align-items: center; padding: 10px 14px; gap: 10px;
+  border-bottom: 1px solid #f1f5f9; transition: background 0.15s; cursor: pointer;
+}
+.member-row:last-child { border-bottom: none; }
+.member-row:hover { background: #f8fafc; }
+.member-name { font-weight: 600; font-size: 14px; color: #1e293b; }
+.member-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.note-tag { font-size: 11px; color: #94a3b8; background: #f1f5f9; padding: 2px 7px; border-radius: 4px; }
+.assign-tag { font-size: 11px; color: #6366f1; background: #eef2ff; padding: 2px 7px; border-radius: 4px; }
+.edit-hint { font-size: 11px; color: #94a3b8; margin-left: auto; white-space: nowrap; }
+.empty { padding: 20px; text-align: center; color: #94a3b8; font-size: 13px; }
+
+/* Edit Panel */
+.edit-panel { padding: 12px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+.edit-section-title { font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 8px; }
+.status-buttons { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+.btn-status {
+  padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  border: 1.5px solid; transition: all 0.15s; background: none;
+}
+.input-field {
+  width: 100%; padding: 8px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+  font-size: 13px; outline: none; transition: border-color 0.15s; background: #fff;
+}
+.input-field:focus { border-color: #3b82f6; }
+.select-field {
+  width: 100%; padding: 8px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+  font-size: 13px; outline: none; background: #fff;
+}
+.assignees-info {
+  margin-bottom: 8px; padding: 8px 10px; background: #eef2ff; border-radius: 8px;
+  font-size: 12px; color: #4f46e5;
+}
+
+/* Buttons */
+.btn-sm { padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; border: none; transition: all 0.15s; }
+.btn-primary { background: #3b82f6; color: #fff; }
+.btn-primary:hover { background: #2563eb; }
+.btn-ghost { background: transparent; color: #64748b; border: 1px solid #e2e8f0; }
+.btn-ghost:hover { background: #f1f5f9; }
+.btn-danger { background: #fee2e2; color: #dc2626; }
+.btn-danger:hover { background: #fecaca; }
+.btn-add {
+  width: 100%; padding: 14px; background: #fff; border: none; font-size: 14px;
+  font-weight: 600; color: #3b82f6; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.add-form { padding: 16px; }
+.add-form-title { font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 12px; }
+.add-form-fields { display: flex; flex-direction: column; gap: 8px; }
+.add-form-row { display: flex; gap: 8px; }
+.add-form-row > * { flex: 1; }
+.add-form-actions { display: flex; gap: 8px; margin-top: 4px; }
+.add-form-actions button { flex: 1; padding: 10px 0; }
+
+/* Footer */
+.footer { text-align: center; font-size: 11.5px; color: #94a3b8; padding: 8px 0 4px; }
+.reset-area { text-align: center; padding: 8px 0 20px; }
+.btn-reset { font-size: 11px; }
+
+/* Online indicator */
+.online-bar { text-align: center; margin-bottom: 14px; }
+.online-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.online-dot.connected { background: #22c55e; }
+.online-dot.disconnected { background: #ef4444; }
+.online-text { font-size: 12px; color: #94a3b8; vertical-align: middle; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #1e293b; color: #fff; padding: 10px 20px; border-radius: 999px;
+  font-size: 13px; font-weight: 500; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  animation: toastIn 0.3s ease; pointer-events: none;
+}
+@keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(12px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+
+/* Loading */
+.loading { text-align: center; padding: 60px 20px; color: #94a3b8; font-size: 14px; }
+.spinner { width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Teacher section */
+.teacher-card { border-left: 4px solid #8b5cf6; }
+.teacher-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; }
+.teacher-header:hover { background: #f8fafc; }
+.teacher-left { display: flex; align-items: center; gap: 10px; }
+.teacher-icon { font-size: 20px; }
+.teacher-name { font-weight: 700; font-size: 15px; color: #1e293b; }
+.teacher-status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+
+/* Issues section */
+.issues-card { border-left: 4px solid #f59e0b; }
+.issues-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }
+.issues-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: #92400e; }
+.issues-count { font-size: 12px; color: #94a3b8; }
+.issue-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 16px; border-top: 1px solid #fef3c7; }
+.issue-dot { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; margin-top: 6px; flex-shrink: 0; }
+.issue-content { flex: 1; font-size: 13px; color: #1e293b; line-height: 1.5; }
+.issue-meta { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+.issue-delete { font-size: 11px; color: #dc2626; background: none; border: none; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+.issue-delete:hover { background: #fee2e2; }
+.add-issue-area { padding: 10px 16px; border-top: 1px solid #fef3c7; }
+.add-issue-row { display: flex; gap: 8px; }
+.add-issue-row input { flex: 1; }
+.add-issue-row button { white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+  <div class="loading">
+    <div class="spinner"></div>
+    데이터 불러오는 중...
+  </div>
+</div>
+
+<!-- Firebase SDKs (compat for simplicity) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+<script>
+// ── Firebase Config ──
+const firebaseConfig = {
+  apiKey: "AIzaSyAA27d6-E1ijG5QykVBCkjAve-ZEP2rNb8",
+  authDomain: "jecheongo-reunion.firebaseapp.com",
+  databaseURL: "https://jecheongo-reunion-default-rtdb.firebaseio.com",
+  projectId: "jecheongo-reunion",
+  storageBucket: "jecheongo-reunion.firebasestorage.app",
+  messagingSenderId: "719886065167",
+  appId: "1:719886065167:web:85b7b876fa6192fc92cd7a",
+  measurementId: "G-MS2YST0VE9"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const membersRef = db.ref('members');
+const teacherRef = db.ref('teacher');
+const issuesRef = db.ref('issues');
+
+// ── Initial Data ──
+const INITIAL_MEMBERS = [
+  { name: "김학명", status: "확정", assignedTo: "", note: "" },
+  { name: "박성욱", status: "확정", assignedTo: "", note: "" },
+  { name: "이동길", status: "확정", assignedTo: "", note: "" },
+  { name: "천주성", status: "확정", assignedTo: "", note: "" },
+  { name: "권혁준", status: "준확정", assignedTo: "", note: "" },
+  { name: "이우창", status: "준확정", assignedTo: "", note: "" },
+  { name: "장보현", status: "준확정", assignedTo: "", note: "" },
+  { name: "장용수", status: "준확정", assignedTo: "", note: "" },
+  { name: "황석규", status: "준확정", assignedTo: "", note: "" },
+  { name: "류준현", status: "조건부", assignedTo: "", note: "출산 예정" },
+  { name: "우승식", status: "조건부", assignedTo: "", note: "육아" },
+  { name: "김동진", status: "미정", assignedTo: "박성욱", note: "" },
+  { name: "김동현", status: "미정", assignedTo: "", note: "" },
+  { name: "김태우", status: "미정", assignedTo: "장보현", note: "" },
+  { name: "송준혁", status: "미정", assignedTo: "김학명", note: "" },
+  { name: "심형선", status: "미정", assignedTo: "박성욱", note: "" },
+  { name: "양덕현", status: "미정", assignedTo: "", note: "" },
+  { name: "양희규", status: "미정", assignedTo: "", note: "" },
+  { name: "엄영광", status: "미정", assignedTo: "", note: "" },
+  { name: "유병준", status: "미정", assignedTo: "", note: "" },
+  { name: "윤대근", status: "미정", assignedTo: "", note: "" },
+  { name: "이성호", status: "미정", assignedTo: "", note: "" },
+  { name: "이우성", status: "미정", assignedTo: "", note: "" },
+  { name: "장세욱", status: "미정", assignedTo: "", note: "" },
+  { name: "최영수", status: "미정", assignedTo: "", note: "" },
+  { name: "한재원", status: "미정", assignedTo: "", note: "" },
+  { name: "한종구", status: "미정", assignedTo: "", note: "" },
+  { name: "홍석훈", status: "미정", assignedTo: "", note: "" },
+  { name: "안찬억", status: "불가", assignedTo: "", note: "" },
+  { name: "김석영", status: "불가", assignedTo: "", note: "" },
+  { name: "김현묵", status: "불가", assignedTo: "", note: "" },
+  { name: "박현철", status: "불가", assignedTo: "", note: "" },
+  { name: "이성민", status: "불가", assignedTo: "", note: "" },
+  { name: "조영상", status: "불가", assignedTo: "", note: "" },
+  { name: "최상욱", status: "불가", assignedTo: "", note: "" },
+];
+
+const STATUS_CONFIG = {
+  "확정": { emoji: "✅", color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0", desc: "참석 확실" },
+  "준확정": { emoji: "🟡", color: "#ca8a04", bg: "#fefce8", border: "#fef08a", desc: "올 가능성 높음" },
+  "조건부": { emoji: "🔶", color: "#ea580c", bg: "#fff7ed", border: "#fed7aa", desc: "상황에 따라 불참 가능" },
+  "미정": { emoji: "❓", color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb", desc: "확답 없음 / 미연락" },
+  "불가": { emoji: "❌", color: "#dc2626", bg: "#fef2f2", border: "#fecaca", desc: "불참 확정" },
+};
+const STATUS_ORDER = ["확정", "준확정", "조건부", "미정", "불가"];
+
+// ── State ──
+let members = [];
+let teacher = { name: "최민석 선생님", status: "확정", note: "" };
+let issues = [];
+let expandedGroup = null;
+let editingMember = null;
+let editingTeacher = false;
+let showAddForm = false;
+let showAddIssue = false;
+let isConnected = false;
+let toastTimeout = null;
+
+// ── Korean sort ──
+function koreanSort(a, b) { return a.name.localeCompare(b.name, 'ko'); }
+
+// ── Toast ──
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  clearTimeout(toastTimeout);
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  toastTimeout = setTimeout(() => el.remove(), 2500);
+}
+
+// ── Format date ──
+function formatDateTime() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const h = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+  return `${y}.${m}.${d} ${h}:${min} KST`;
+}
+
+// ── Compute assignees from assignedTo ──
+function getAssignees(name) {
+  return members.filter(m => m.assignedTo === name).map(m => m.name).sort((a, b) => a.localeCompare(b, 'ko'));
+}
+
+// ── Firebase Operations ──
+function saveMember(member) {
+  const key = member.name;
+  membersRef.child(key).set({
+    name: member.name,
+    status: member.status,
+    assignedTo: member.assignedTo || "",
+    note: member.note || "",
+  });
+}
+
+function deleteMember(name) {
+  membersRef.child(name).remove();
+  // clear assignedTo references
+  members.forEach(m => {
+    if (m.assignedTo === name) {
+      m.assignedTo = "";
+      saveMember(m);
+    }
+  });
+}
+
+function initializeData() {
+  INITIAL_MEMBERS.forEach(m => saveMember(m));
+}
+
+// ── Render ──
+function render() {
+  const app = document.getElementById('app');
+  const counts = {};
+  STATUS_ORDER.forEach(s => { counts[s] = members.filter(m => m.status === s).length; });
+  const total = members.length;
+  const attendExpected = counts["확정"] + counts["준확정"] + Math.round(counts["조건부"] * 0.5);
+
+  let html = '';
+
+  // Header
+  html += `
+    <div class="header">
+      <div class="header-photo"><img src="photo.jpg" alt="제천고 3-5반 단체사진"></div>
+      <div class="header-school">제천고등학교 54회(2005년 졸업)</div>
+      <h1 class="header-title">3학년 5반 동창 모임</h1>
+      <div class="header-info">
+        <span>📅 2026년 5월 16일(토) 오후 6시</span>
+        <span>📍 서울 강남</span>
+      </div>
+    </div>
+  `;
+
+  // Online status
+  html += `
+    <div class="online-bar">
+      <span class="online-dot ${isConnected ? 'connected' : 'disconnected'}"></span>
+      <span class="online-text">${isConnected ? '실시간 연결됨' : '연결 끊김'}</span>
+    </div>
+  `;
+
+  // Summary
+  html += `<div class="card" style="margin-bottom:14px">`;
+  html += `<div class="summary">`;
+  html += `<div class="summary-header"><span class="summary-label">참석 현황</span><span class="summary-total">최민석 선생님 + 학생 ${total}명</span></div>`;
+  html += `<div class="pills">`;
+  STATUS_ORDER.forEach(s => {
+    const c = STATUS_CONFIG[s];
+    html += `<span class="pill" style="background:${c.bg};color:${c.color};border:1px solid ${c.border}">${c.emoji} ${s} ${counts[s]}</span>`;
+  });
+  html += `</div>`;
+  html += `<div class="expected">📊 예상 참석: <strong>${attendExpected}명</strong> <span class="sub">(확정 + 준확정 + 조건부 50%)</span></div>`;
+  html += `</div>`;
+  // Progress bar
+  html += `<div class="progress-bar">`;
+  STATUS_ORDER.forEach(s => {
+    if (counts[s] > 0) {
+      html += `<div style="flex:${counts[s]};background:${STATUS_CONFIG[s].color};transition:flex 0.3s"></div>`;
+    }
+  });
+  html += `</div></div>`;
+
+  // Teacher Section
+  html += `<div class="card teacher-card" style="margin-bottom:14px">`;
+  html += `<div class="teacher-header" onclick="toggleTeacherEdit()">`;
+  html += `<div class="teacher-left">`;
+  html += `<span class="teacher-icon">🎓</span>`;
+  html += `<div><span class="teacher-name">${teacher.name}</span>`;
+  if (teacher.note) html += `<div style="font-size:12px;color:#94a3b8;margin-top:2px">${teacher.note}</div>`;
+  html += `</div></div>`;
+  const tc = STATUS_CONFIG[teacher.status] || STATUS_CONFIG["미정"];
+  html += `<span class="teacher-status-pill" style="background:${tc.bg};color:${tc.color};border:1px solid ${tc.border}">${tc.emoji} ${teacher.status}</span>`;
+  html += `</div>`;
+  if (editingTeacher) {
+    html += `<div class="edit-panel">`;
+    html += `<div class="edit-section-title">선생님 상태 변경</div>`;
+    html += `<div class="status-buttons">`;
+    STATUS_ORDER.forEach(s => {
+      const sc = STATUS_CONFIG[s];
+      const isActive = teacher.status === s;
+      html += `<button class="btn-status" style="background:${isActive ? sc.color : sc.bg};color:${isActive ? '#fff' : sc.color};border-color:${sc.border}" onclick="event.stopPropagation();changeTeacherStatus('${s}')">${sc.emoji} ${s}</button>`;
+    });
+    html += `</div>`;
+    html += `<div style="margin-bottom:8px"><input class="input-field" placeholder="비고" value="${teacher.note || ''}" oninput="changeTeacherNote(this.value)" onclick="event.stopPropagation()"></div>`;
+    html += `</div>`;
+  }
+  html += `</div>`;
+
+  // Issues Section
+  html += `<div class="card issues-card" style="margin-bottom:14px">`;
+  html += `<div class="issues-header" style="background:#fffbeb">`;
+  html += `<div class="issues-title">📌 현재 이슈</div>`;
+  html += `<span class="issues-count">${issues.length}건</span>`;
+  html += `</div>`;
+  if (issues.length === 0) {
+    html += `<div class="empty" style="border-top:1px solid #fef3c7">등록된 이슈가 없습니다</div>`;
+  } else {
+    issues.forEach((issue, i) => {
+      html += `<div class="issue-item">`;
+      html += `<span class="issue-dot"></span>`;
+      html += `<div style="flex:1"><div class="issue-content">${escapeHtml(issue.text)}</div>`;
+      html += `<div class="issue-meta">${issue.author || '익명'} · ${issue.date || ''}</div></div>`;
+      html += `<button class="issue-delete" onclick="deleteIssue('${issue.id}')">✕</button>`;
+      html += `</div>`;
+    });
+  }
+  if (!showAddIssue) {
+    html += `<div style="padding:10px 16px;border-top:1px solid #fef3c7"><button class="btn-add" style="padding:8px;font-size:13px;color:#92400e" onclick="toggleAddIssue()">+ 이슈 추가</button></div>`;
+  } else {
+    html += `<div class="add-issue-area">`;
+    html += `<div style="margin-bottom:6px"><input class="input-field" id="newIssueText" placeholder="이슈 내용 입력"></div>`;
+    html += `<div class="add-issue-row">`;
+    html += `<input class="input-field" id="newIssueAuthor" placeholder="작성자 (선택)">`;
+    html += `<button class="btn-sm btn-primary" onclick="addIssue()">등록</button>`;
+    html += `<button class="btn-sm btn-ghost" onclick="toggleAddIssue()">취소</button>`;
+    html += `</div></div>`;
+  }
+  html += `</div>`;
+
+  // Groups
+  STATUS_ORDER.forEach(status => {
+    const c = STATUS_CONFIG[status];
+    const group = members.filter(m => m.status === status).sort(koreanSort);
+    const isOpen = expandedGroup === status;
+
+    html += `<div class="card">`;
+    html += `<div class="group-header" style="background:${c.bg}" onclick="toggleGroup('${status}')">`;
+    html += `<div class="group-left"><span class="group-emoji">${c.emoji}</span><span class="group-label" style="color:${c.color}">${status}</span><span class="group-desc">${c.desc}</span></div>`;
+    html += `<div class="group-right"><span class="badge" style="background:${c.color}">${group.length}</span><span class="arrow ${isOpen ? 'open' : ''}">▼</span></div>`;
+    html += `</div>`;
+
+    if (isOpen) {
+      if (group.length === 0) {
+        html += `<div class="empty">없음</div>`;
+      } else {
+        group.forEach(m => {
+          const assignees = getAssignees(m.name);
+          html += `<div class="member-row" onclick="toggleEdit('${m.name}')">`;
+          html += `<div style="flex:1;min-width:0"><div class="member-tags">`;
+          html += `<span class="member-name">${m.name}</span>`;
+          if (m.note) html += `<span class="note-tag">${m.note}</span>`;
+          if (m.assignedTo) html += `<span class="assign-tag">담당: ${m.assignedTo}</span>`;
+          if (assignees.length > 0) html += `<span class="assign-tag">연락 담당 → ${assignees.join(', ')}</span>`;
+          html += `</div></div>`;
+          html += `<span class="edit-hint">수정 ›</span>`;
+          html += `</div>`;
+
+          if (editingMember === m.name) {
+            html += `<div class="edit-panel">`;
+            html += `<div class="edit-section-title">상태 변경</div>`;
+            html += `<div class="status-buttons">`;
+            STATUS_ORDER.forEach(s => {
+              const sc = STATUS_CONFIG[s];
+              const isActive = m.status === s;
+              html += `<button class="btn-status" style="background:${isActive ? sc.color : sc.bg};color:${isActive ? '#fff' : sc.color};border-color:${sc.border}" onclick="event.stopPropagation();changeStatus('${m.name}','${s}')">${sc.emoji} ${s}</button>`;
+            });
+            html += `</div>`;
+            html += `<div style="margin-bottom:8px"><input class="input-field" placeholder="비고 (예: 출산 예정, 해외 출장)" value="${m.note || ''}" oninput="changeNote('${m.name}', this.value)" onclick="event.stopPropagation()"></div>`;
+            html += `<div style="margin-bottom:8px"><div class="edit-section-title">연락 담당자 (이 사람에게 연락할 담당)</div>`;
+            html += `<select class="select-field" onchange="event.stopPropagation();changeAssignedTo('${m.name}', this.value)" onclick="event.stopPropagation()">`;
+            html += `<option value="">담당 미정</option>`;
+            members.filter(o => o.name !== m.name).sort(koreanSort).forEach(o => {
+              html += `<option value="${o.name}" ${m.assignedTo === o.name ? 'selected' : ''}>${o.name}</option>`;
+            });
+            html += `</select></div>`;
+            if (assignees.length > 0) {
+              html += `<div class="assignees-info">📋 연락 담당 대상: ${assignees.join(', ')}</div>`;
+            }
+
+            html += `</div>`;
+          }
+        });
+      }
+    }
+    html += `</div>`;
+  });
+
+  // Footer
+  html += `<div class="footer">최종 업데이트: ${formatDateTime()}</div>`;
+
+  app.innerHTML = html;
+}
+
+// ── Event Handlers ──
+function toggleGroup(status) {
+  expandedGroup = expandedGroup === status ? null : status;
+  editingMember = null;
+  render();
+}
+
+function toggleEdit(name) {
+  editingMember = editingMember === name ? null : name;
+  render();
+}
+
+function changeStatus(name, newStatus) {
+  const m = members.find(x => x.name === name);
+  if (m) {
+    m.status = newStatus;
+    saveMember(m);
+    showToast(`${name} → ${newStatus}`);
+    editingMember = null;
+  }
+}
+
+let noteTimer = null;
+function changeNote(name, note) {
+  const m = members.find(x => x.name === name);
+  if (m) {
+    m.note = note;
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(() => saveMember(m), 500);
+  }
+}
+
+function changeAssignedTo(name, assignedTo) {
+  const m = members.find(x => x.name === name);
+  if (m) {
+    m.assignedTo = assignedTo;
+    saveMember(m);
+    render();
+  }
+}
+
+function removeMember(name) {
+  if (!confirm(`${name}을(를) 삭제하시겠습니까?`)) return;
+  deleteMember(name);
+  editingMember = null;
+  showToast(`${name} 삭제됨`);
+}
+
+function toggleAddForm() {
+  showAddForm = !showAddForm;
+  render();
+}
+
+function addMember() {
+  const name = document.getElementById('newName').value.trim();
+  const status = document.getElementById('newStatus').value;
+  const assignedTo = document.getElementById('newAssignedTo').value.trim();
+  const note = document.getElementById('newNote').value.trim();
+
+  if (!name) { showToast('이름을 입력해주세요'); return; }
+  if (members.some(m => m.name === name)) { showToast('이미 존재하는 이름입니다'); return; }
+
+  saveMember({ name, status, assignedTo, note });
+  showAddForm = false;
+  showToast(`${name} 추가됨 (${status})`);
+}
+
+function resetData() {
+  if (!confirm('초기 데이터로 복원하시겠습니까?\n현재 데이터가 모두 삭제됩니다.')) return;
+  membersRef.remove().then(() => {
+    initializeData();
+    teacherRef.set({ name: "최민석 선생님", status: "확정", note: "" });
+    issuesRef.remove();
+    showToast('초기화 완료');
+  });
+}
+
+// ── Escape HTML ──
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ── Teacher Handlers ──
+function toggleTeacherEdit() {
+  editingTeacher = !editingTeacher;
+  render();
+}
+
+function changeTeacherStatus(newStatus) {
+  teacher.status = newStatus;
+  teacherRef.set(teacher);
+  editingTeacher = false;
+  showToast(`최민석 선생님 → ${newStatus}`);
+}
+
+let teacherNoteTimer = null;
+function changeTeacherNote(note) {
+  teacher.note = note;
+  clearTimeout(teacherNoteTimer);
+  teacherNoteTimer = setTimeout(() => teacherRef.set(teacher), 500);
+}
+
+// ── Issues Handlers ──
+function toggleAddIssue() {
+  showAddIssue = !showAddIssue;
+  render();
+}
+
+function addIssue() {
+  const text = document.getElementById('newIssueText').value.trim();
+  const author = document.getElementById('newIssueAuthor').value.trim();
+  if (!text) { showToast('이슈 내용을 입력해주세요'); return; }
+
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+  const newIssue = {
+    id: Date.now().toString(),
+    text: text,
+    author: author || '익명',
+    date: dateStr
+  };
+  issuesRef.child(newIssue.id).set(newIssue);
+  showAddIssue = false;
+  showToast('이슈 추가됨');
+}
+
+function deleteIssue(id) {
+  if (!confirm('이 이슈를 삭제하시겠습니까?')) return;
+  issuesRef.child(id).remove();
+  showToast('이슈 삭제됨');
+}
+
+// ── Firebase Listeners ──
+db.ref('.info/connected').on('value', snap => {
+  isConnected = snap.val() === true;
+  render();
+});
+
+membersRef.on('value', snap => {
+  const data = snap.val();
+  if (!data) {
+    // DB is empty, initialize
+    initializeData();
+    return;
+  }
+  members = Object.values(data).sort(koreanSort);
+  render();
+});
+
+// Teacher listener
+teacherRef.on('value', snap => {
+  const data = snap.val();
+  if (data) {
+    teacher = data;
+  } else {
+    teacher = { name: "최민석 선생님", status: "확정", note: "" };
+    teacherRef.set(teacher);
+  }
+  render();
+});
+
+// Issues listener
+issuesRef.on('value', snap => {
+  const data = snap.val();
+  if (data) {
+    issues = Object.values(data).sort((a, b) => Number(b.id) - Number(a.id));
+  } else {
+    issues = [];
+  }
+  render();
+});
+</script>
+</body>
+</html>
